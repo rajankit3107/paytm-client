@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 
 interface User {
@@ -12,10 +13,12 @@ interface UserProps {
 }
 
 export const Users = () => {
+  const navigate = useNavigate();
+
   // Replace with backend call
   const allUsers: User[] = [
     {
-      firstName: "Harkirat",
+      firstName: "Ankit",
       lastName: "Singh",
       _id: 1,
     },
@@ -38,6 +41,15 @@ export const Users = () => {
       user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleSendMoney = (user: User) => {
+    navigate("/send-money", {
+      state: {
+        recipientName: `${user.firstName} ${user.lastName}`,
+        recipientInitial: user.firstName[0],
+      },
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -75,7 +87,7 @@ export const Users = () => {
             className="transform transition-all duration-300 hover:scale-[1.02]"
             style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <User user={user} />
+            <User user={user} onSendMoney={() => handleSendMoney(user)} />
           </div>
         ))}
       </div>
@@ -83,7 +95,12 @@ export const Users = () => {
   );
 };
 
-function User({ user }: UserProps) {
+interface UserProps {
+  user: User;
+  onSendMoney: () => void;
+}
+
+function User({ user, onSendMoney }: UserProps) {
   return (
     <div className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300 group">
       <div className="flex items-center space-x-4">
@@ -98,7 +115,7 @@ function User({ user }: UserProps) {
       </div>
 
       <div className="flex items-center">
-        <Button label={"Send Money"} />
+        <Button label={"Send Money"} onClick={onSendMoney} />
       </div>
     </div>
   );
