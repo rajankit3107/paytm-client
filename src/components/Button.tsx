@@ -1,6 +1,6 @@
 interface ButtonProps {
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export function Button({ label, onClick }: ButtonProps) {
