@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { Button } from "./Button";
+import { BACKEND_URL } from "../config";
 
 interface User {
   firstName: string;
@@ -10,37 +12,61 @@ interface User {
 
 interface UserProps {
   user: User;
+  onSendMoney: () => void;
 }
 
 export const Users = () => {
   const navigate = useNavigate();
-
-  // Replace with backend call
-  const allUsers: User[] = [
-    {
-      firstName: "Ankit",
-      lastName: "Singh",
-      _id: 1,
-    },
-    {
-      firstName: "John",
-      lastName: "Doe",
-      _id: 2,
-    },
-    {
-      firstName: "Jane",
-      lastName: "Smith",
-      _id: 3,
-    },
-  ];
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredUsers = allUsers.filter(
-    (user) =>
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        return;
+      }
+
+      const response = await axios.get(`${BACKEND_URL}/api/v1/user/bulk`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUsers(response.data.users || response.data); // Handle different response formats
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 401) {
+          setError("Authentication failed. Please login again.");
+          // Optionally redirect to login page
+          // navigate("/signin");
+        } else {
+          setError(
+            err.response?.data?.message ||
+              err.message ||
+              "Failed to fetch users"
+          );
+        }
+      } else {
+        setError("Failed to fetch users");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSendMoney = (user: User) => {
     navigate("/send-money", {
@@ -51,10 +77,48 @@ export const Users = () => {
     });
   };
 
+  const filteredUsers = users.filter(
+    (user) =>
+      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="font-bold text-2xl text-gray-800">Users</div>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <span className="ml-3 text-gray-600">Loading users...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="font-bold text-2xl text-gray-800">Users</div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+          <div className="text-red-600 font-medium mb-2">
+            Error loading users
+          </div>
+          <div className="text-red-500 text-sm mb-4">{error}</div>
+          <button
+            onClick={fetchUsers}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="font-bold text-2xl text-gray-800 hover:text-gray-900 transition-colors duration-300">
-        Users
+        Users ({users.length})
       </div>
       <div className="relative group">
         <input
@@ -80,25 +144,29 @@ export const Users = () => {
           </svg>
         </div>
       </div>
-      <div className="space-y-4">
-        {filteredUsers.map((user, index) => (
-          <div
-            key={user._id}
-            className="transform transition-all duration-300 hover:scale-[1.02]"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <User user={user} onSendMoney={() => handleSendMoney(user)} />
-          </div>
-        ))}
-      </div>
+
+      {filteredUsers.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          {searchTerm
+            ? "No users found matching your search."
+            : "No users available."}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredUsers.map((user, index) => (
+            <div
+              key={user._id}
+              className="transform transition-all duration-300 hover:scale-[1.02]"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <User user={user} onSendMoney={() => handleSendMoney(user)} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
-
-interface UserProps {
-  user: User;
-  onSendMoney: () => void;
-}
 
 function User({ user, onSendMoney }: UserProps) {
   return (
