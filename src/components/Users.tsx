@@ -45,14 +45,13 @@ export const Users = () => {
         },
       });
 
-      setUsers(response.data.users || response.data); // Handle different response formats
+      setUsers(response.data.users);
     } catch (err) {
       console.error("Error fetching users:", err);
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
           setError("Authentication failed. Please login again.");
-          // Optionally redirect to login page
-          // navigate("/signin");
+          navigate("/signin");
         } else {
           setError(
             err.response?.data?.message ||
