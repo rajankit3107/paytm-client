@@ -22,12 +22,13 @@ export const Signup = () => {
     const username = usernameRef.current?.value.toString();
     const password = passwordRef.current?.value.toString();
 
-    await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
+    const response = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
       firstName,
       lastName,
       username,
       password,
     });
+    localStorage.setItem("token", response.data.token);
     navigate("/dashboard");
   }
   return (

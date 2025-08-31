@@ -1,10 +1,28 @@
+import { useRef } from "react";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 export const Signin = () => {
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+
+  async function handleSignin() {
+    const username = usernameRef.current?.value;
+    const password = passwordRef.current?.value;
+
+    await axios.post(`${BACKEND_URL}/api/v1/user/signin`, {
+      username,
+      password,
+    });
+    navigate("/dashboard");
+  }
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background with gradient and pattern */}
@@ -28,13 +46,21 @@ export const Signin = () => {
 
           {/* Form Section */}
           <div className="space-y-6">
-            <InputBox placeholder="harkirat@gmail.com" label={"Email"} />
-            <InputBox placeholder="123456" label={"Password"} />
+            <InputBox
+              ref={usernameRef}
+              placeholder="user@gmail.com"
+              label={"Email"}
+            />
+            <InputBox
+              ref={passwordRef}
+              placeholder="123456"
+              label={"Password"}
+            />
           </div>
 
           {/* Button Section */}
           <div className="pt-4">
-            <Button label={"Sign in"} />
+            <Button label={"Sign in"} onClick={handleSignin} />
           </div>
 
           {/* Bottom Warning */}
