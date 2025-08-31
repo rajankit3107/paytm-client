@@ -3,5 +3,7 @@ interface HeadingProps {
 }
 
 export function Heading({ label }: HeadingProps) {
-  return <div className="font-bold text-4xl pt-6">{label}</div>;
+  return (
+    <h1 className="font-bold text-3xl text-gray-800 tracking-tight">{label}</h1>
+  );
 }
