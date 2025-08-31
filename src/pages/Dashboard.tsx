@@ -1,8 +1,33 @@
+import axios from "axios";
 import { Appbar } from "../components/AppBar";
 import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
+import { BACKEND_URL } from "../config";
+import { useEffect, useState } from "react";
 
 export const Dashboard = () => {
+  const [balance, setBalance] = useState(0);
+
+  useEffect(() => {
+    getBalance();
+  }, []);
+  const getBalance = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        `${BACKEND_URL}/api/v1/account/balance`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setBalance(response.data.balance);
+    } catch (error) {
+      console.error(`Error fetching balance`, error);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 relative overflow-hidden">
       {/* Elegant background elements */}
@@ -27,7 +52,7 @@ export const Dashboard = () => {
 
           {/* Balance Card with smooth hover effects */}
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 ease-out animate-slide-up">
-            <Balance value={4000} />
+            <Balance value={balance} />
           </div>
 
           {/* Users Section with smooth hover effects */}
