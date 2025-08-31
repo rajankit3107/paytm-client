@@ -1,10 +1,35 @@
+import { useRef } from "react";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
+import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  const navigate = useNavigate();
+
+  async function handleSignup() {
+    const firstName = firstNameRef.current?.value.toString();
+    const lastName = lastNameRef.current?.value.toString();
+    const username = usernameRef.current?.value.toString();
+    const password = passwordRef.current?.value.toString();
+
+    await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
+      firstName,
+      lastName,
+      username,
+      password,
+    });
+    navigate("/dashboard");
+  }
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background with gradient and pattern */}
@@ -29,16 +54,32 @@ export const Signup = () => {
           {/* Form Section */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <InputBox placeholder="John" label={"First Name"} />
-              <InputBox placeholder="Doe" label={"Last Name"} />
+              <InputBox
+                ref={firstNameRef}
+                placeholder="firstname"
+                label={"First Name"}
+              />
+              <InputBox
+                ref={lastNameRef}
+                placeholder="lastname"
+                label={"Last Name"}
+              />
             </div>
-            <InputBox placeholder="harkirat@gmail.com" label={"Email"} />
-            <InputBox placeholder="123456" label={"Password"} />
+            <InputBox
+              ref={usernameRef}
+              placeholder="user@gmail.com"
+              label={"Email"}
+            />
+            <InputBox
+              ref={passwordRef}
+              placeholder="123456"
+              label={"Password"}
+            />
           </div>
 
           {/* Button Section */}
           <div className="pt-2">
-            <Button label={"Sign up"} />
+            <Button label={"Sign up"} onClick={handleSignup} />
           </div>
 
           {/* Bottom Warning */}
