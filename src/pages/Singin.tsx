@@ -4,7 +4,7 @@ import { Heading } from "../components/Heading";
 import { InputBox } from "../components/InputBox";
 import { SubHeading } from "../components/SubHeading";
 
-export const Signup = () => {
+export const Signin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background with gradient and pattern */}
@@ -19,34 +19,30 @@ export const Signup = () => {
 
       {/* Main content */}
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 space-y-6 border border-white/20">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 space-y-8 border border-white/20">
           {/* Header Section */}
-          <div className="text-center space-y-2">
-            <Heading label={"Sign up"} />
-            <SubHeading label={"Enter your information to create an account"} />
+          <div className="text-center space-y-3">
+            <Heading label={"Welcome back"} />
+            <SubHeading label={"Sign in to your account to continue"} />
           </div>
 
           {/* Form Section */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <InputBox placeholder="John" label={"First Name"} />
-              <InputBox placeholder="Doe" label={"Last Name"} />
-            </div>
+          <div className="space-y-6">
             <InputBox placeholder="harkirat@gmail.com" label={"Email"} />
             <InputBox placeholder="123456" label={"Password"} />
           </div>
 
           {/* Button Section */}
-          <div className="pt-2">
-            <Button label={"Sign up"} />
+          <div className="pt-4">
+            <Button label={"Sign in"} />
           </div>
 
           {/* Bottom Warning */}
-          <div className="pt-2">
+          <div className="pt-4">
             <BottomWarning
-              label={"Already have an account?"}
-              buttonText={"Sign in"}
-              to={"/signin"}
+              label={"Don't have an account?"}
+              buttonText={"Sign up"}
+              to={"/"}
             />
           </div>
         </div>
