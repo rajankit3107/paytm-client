@@ -1,15 +1,14 @@
-import { Button } from "./components/Button";
-import { Heading } from "./components/Heading";
-import { InputBox } from "./components/InputBox";
-import { SubHeading } from "./components/SubHeading";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Signup } from "./pages/Signup";
 
 function App() {
   return (
     <>
-      <Heading label="Sign up" />
-      <SubHeading label="Enter your information to create an account" />
-      <InputBox label="FirstName" placeholder="Enter your First name" />
-      <Button label="sign up" onClick={() => alert("hey there")} />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
