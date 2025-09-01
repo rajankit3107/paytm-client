@@ -10,7 +10,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     getBalance();
-  }, []);
+  });
   const getBalance = async () => {
     try {
       const token = localStorage.getItem("token");
