@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
@@ -7,23 +7,50 @@ import { SubHeading } from "../components/SubHeading";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { useNavigate } from "react-router-dom";
+import { setToken } from "../utils/auth";
 
 export const Signin = () => {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   async function handleSignin() {
-    const username = usernameRef.current?.value;
+    const username = usernameRef.current?.value?.trim();
     const password = passwordRef.current?.value;
 
-    const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, {
-      username,
-      password,
-    });
-    localStorage.setItem("token", response.data.token);
-    navigate("/dashboard");
+    // Validation
+    if (!username || !password) {
+      setError("Email and password are required");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, {
+        username,
+        password,
+      });
+
+      setToken(response.data.token);
+      navigate("/dashboard");
+    } catch (err: unknown) {
+      console.error("Signin error:", err);
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message || "Signin failed. Please try again."
+        );
+      } else {
+        setError("Signin failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background with gradient and pattern */}
@@ -45,11 +72,18 @@ export const Signin = () => {
             <SubHeading label={"Sign in to your account to continue"} />
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Form Section */}
           <div className="space-y-6">
             <InputBox
               ref={usernameRef}
-              placeholder="user@gmail.com"
+              placeholder="john@gmail.com"
               label={"Email"}
             />
             <InputBox
@@ -61,7 +95,10 @@ export const Signin = () => {
 
           {/* Button Section */}
           <div className="pt-4">
-            <Button label={"Sign in"} onClick={handleSignin} />
+            <Button
+              label={isLoading ? "Signing in..." : "Sign in"}
+              onClick={handleSignin}
+            />
           </div>
 
           {/* Bottom Warning */}

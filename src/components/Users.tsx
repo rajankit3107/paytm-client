@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "./Button";
 import { BACKEND_URL } from "../config";
+import { getToken } from "../utils/auth";
 
 interface User {
   firstName: string;
@@ -32,7 +33,7 @@ export const Users = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
         setError("Authentication token not found. Please login again.");

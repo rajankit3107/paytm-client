@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { BottomWarning } from "../components/BottomWarning";
 import { Button } from "../components/Button";
 import { Heading } from "../components/Heading";
@@ -7,30 +7,62 @@ import { SubHeading } from "../components/SubHeading";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { useNavigate } from "react-router-dom";
+import { setToken } from "../utils/auth";
 
 export const Signup = () => {
   const firstNameRef = useRef<HTMLInputElement>(null);
   const lastNameRef = useRef<HTMLInputElement>(null);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   async function handleSignup() {
-    const firstName = firstNameRef.current?.value.toString();
-    const lastName = lastNameRef.current?.value.toString();
-    const username = usernameRef.current?.value.toString();
-    const password = passwordRef.current?.value.toString();
+    const firstName = firstNameRef.current?.value?.trim();
+    const lastName = lastNameRef.current?.value?.trim();
+    const username = usernameRef.current?.value?.trim();
+    const password = passwordRef.current?.value;
 
-    const response = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
-      firstName,
-      lastName,
-      username,
-      password,
-    });
-    localStorage.setItem("token", response.data.token);
-    navigate("/dashboard");
+    // Validation
+    if (!firstName || !lastName || !username || !password) {
+      setError("All fields are required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
+        firstName,
+        lastName,
+        username,
+        password,
+      });
+
+      setToken(response.data.token);
+      navigate("/dashboard");
+    } catch (err: unknown) {
+      console.error("Signup error:", err);
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message || "Signup failed. Please try again."
+        );
+      } else {
+        setError("Signup failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background with gradient and pattern */}
@@ -52,23 +84,30 @@ export const Signup = () => {
             <SubHeading label={"Enter your information to create an account"} />
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Form Section */}
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <InputBox
                 ref={firstNameRef}
-                placeholder="firstname"
+                placeholder="John"
                 label={"First Name"}
               />
               <InputBox
                 ref={lastNameRef}
-                placeholder="lastname"
+                placeholder="Doe"
                 label={"Last Name"}
               />
             </div>
             <InputBox
               ref={usernameRef}
-              placeholder="user@gmail.com"
+              placeholder="john@gmail.com"
               label={"Email"}
             />
             <InputBox
@@ -80,7 +119,10 @@ export const Signup = () => {
 
           {/* Button Section */}
           <div className="pt-2">
-            <Button label={"Sign up"} onClick={handleSignup} />
+            <Button
+              label={isLoading ? "Creating account..." : "Sign up"}
+              onClick={handleSignup}
+            />
           </div>
 
           {/* Bottom Warning */}

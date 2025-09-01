@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
+import { getToken } from "../utils/auth";
 
 interface SendMoneyProps {
   recipientName?: string;
@@ -13,7 +14,7 @@ export const SendMoney = ({
   recipientName = "Friend's Name",
   recipientInitial = "A",
 }: SendMoneyProps) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   const location = useLocation();
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
