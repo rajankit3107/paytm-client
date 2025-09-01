@@ -17,10 +17,11 @@ export const Signin = () => {
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
 
-    await axios.post(`${BACKEND_URL}/api/v1/user/signin`, {
+    const response = await axios.post(`${BACKEND_URL}/api/v1/user/signin`, {
       username,
       password,
     });
+    localStorage.setItem("token", response.data.token);
     navigate("/dashboard");
   }
   return (
