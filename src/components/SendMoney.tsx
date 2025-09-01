@@ -96,10 +96,15 @@ export const SendMoney = ({
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
+      .then(async (response) => {
         console.log("Transfer successful:", response.data);
         alert("Transfer initiated successfully!");
         setAmount(""); // Clear the amount
+
+        // Navigate back to dashboard with refresh flag
+        navigate("/dashboard", {
+          state: { refreshBalance: true },
+        });
       })
       .catch((error) => {
         console.error("Transfer failed:", error);
@@ -113,7 +118,6 @@ export const SendMoney = ({
           alert("Transfer failed. Please try again.");
         }
       });
-    navigate("/dashboard");
   };
 
   const handleBack = () => {

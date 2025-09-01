@@ -4,16 +4,39 @@ import { Balance } from "../components/Balance";
 import { Users } from "../components/Users";
 import { BACKEND_URL } from "../config";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export const Dashboard = () => {
   const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     getBalance();
-  });
+  }, []);
+
+  // Check if we need to refresh balance after returning from a transaction
+  useEffect(() => {
+    if (location.state?.refreshBalance) {
+      console.log("Refreshing balance after transaction");
+      getBalance();
+      // Clear the state to prevent unnecessary refreshes
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   const getBalance = async () => {
     try {
+      setLoading(true);
+      setError(null);
+
       const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Authentication token not found");
+        return;
+      }
 
       const response = await axios.get(
         `${BACKEND_URL}/api/v1/account/balance`,
@@ -23,9 +46,13 @@ export const Dashboard = () => {
           },
         }
       );
+
       setBalance(response.data.balance);
     } catch (error) {
       console.error(`Error fetching balance`, error);
+      setError("Failed to fetch balance");
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -52,7 +79,17 @@ export const Dashboard = () => {
 
           {/* Balance Card with smooth hover effects */}
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/30 hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 ease-out animate-slide-up">
-            <Balance value={balance} />
+            <Balance value={balance} loading={loading} error={error} />
+            {error && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={getBalance}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Users Section with smooth hover effects */}
