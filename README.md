@@ -68,12 +68,6 @@ src/
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-- Backend server running (for API calls)
-
 ### Installation
 
 1. **Clone the repository**
