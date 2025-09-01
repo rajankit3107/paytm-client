@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "./Button";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
 
 interface SendMoneyProps {
   recipientName?: string;
   recipientInitial?: string;
-  onSend?: (amount: number) => void;
 }
 
 export const SendMoney = ({
   recipientName = "Friend's Name",
   recipientInitial = "A",
-  onSend,
 }: SendMoneyProps) => {
+  const token = localStorage.getItem("token");
   const location = useLocation();
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
@@ -21,15 +22,97 @@ export const SendMoney = ({
   const userData = location.state as {
     recipientName?: string;
     recipientInitial?: string;
+    recipientId?: string | number;
   } | null;
+
+  console.log("Location state:", location.state);
+  console.log("User data:", userData);
+  console.log("Final recipient ID:", userData?.recipientId);
+
   const finalRecipientName = userData?.recipientName || recipientName;
   const finalRecipientInitial = userData?.recipientInitial || recipientInitial;
+  const finalRecipientId = userData?.recipientId;
+
+  // If no recipient data, show a message
+  if (!finalRecipientId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 flex items-center justify-center p-4">
+        <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-8 text-center space-y-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            No Recipient Selected
+          </h2>
+          <p className="text-gray-600">
+            Please go back to the Users page and select someone to send money
+            to.
+          </p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSend = () => {
-    const numAmount = parseFloat(amount);
-    if (numAmount > 0 && onSend) {
-      onSend(numAmount);
+    console.log("handleSend called");
+    console.log("Amount:", amount);
+    console.log("Recipient ID:", finalRecipientId);
+    console.log("Token:", token);
+    console.log("Backend URL:", BACKEND_URL);
+
+    if (!amount || Number(amount) <= 0) {
+      console.error("Invalid amount");
+      alert("Please enter a valid amount");
+      return;
     }
+
+    if (!finalRecipientId) {
+      console.error("Recipient ID is undefined");
+      alert("Recipient ID is missing");
+      return;
+    }
+
+    if (!token) {
+      console.error("No authentication token");
+      alert("Please login again");
+      return;
+    }
+
+    const requestData = {
+      amount: Number(amount),
+      to: finalRecipientId,
+    };
+
+    console.log("Request data being sent:", requestData);
+    console.log("Making API call...");
+
+    axios
+      .post(`${BACKEND_URL}/api/v1/account/transfer`, requestData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log("Transfer successful:", response.data);
+        alert("Transfer initiated successfully!");
+        setAmount(""); // Clear the amount
+      })
+      .catch((error) => {
+        console.error("Transfer failed:", error);
+        if (error.response) {
+          console.error("Error response:", error.response.data);
+          console.error("Error status:", error.response.status);
+          alert(
+            `Transfer failed: ${error.response.data.message || error.message}`
+          );
+        } else {
+          alert("Transfer failed. Please try again.");
+        }
+      });
+    navigate("/dashboard");
   };
 
   const handleBack = () => {

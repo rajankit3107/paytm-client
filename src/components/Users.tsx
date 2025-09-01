@@ -7,7 +7,8 @@ import { BACKEND_URL } from "../config";
 interface User {
   firstName: string;
   lastName: string;
-  _id: number;
+  username: string;
+  id: string;
 }
 
 interface UserProps {
@@ -45,6 +46,18 @@ export const Users = () => {
         },
       });
 
+      console.log("API Response:", response.data);
+      console.log("Users array:", response.data.users);
+      if (response.data.users && response.data.users.length > 0) {
+        console.log("First user object:", response.data.users[0]);
+        console.log("First user keys:", Object.keys(response.data.users[0]));
+        console.log("First user username:", response.data.users[0].username);
+        console.log(
+          "First user username type:",
+          typeof response.data.users[0].username
+        );
+      }
+
       setUsers(response.data.users);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -68,11 +81,20 @@ export const Users = () => {
   };
 
   const handleSendMoney = (user: User) => {
+    console.log("handleSendMoney called with user:", user);
+    console.log("Username type:", typeof user.username);
+    console.log("Username value:", user.username);
+
+    const navigationState = {
+      recipientName: `${user.firstName} ${user.lastName}`,
+      recipientInitial: user.firstName[0],
+      recipientId: user.id,
+    };
+
+    console.log("Navigation state being passed:", navigationState);
+
     navigate("/send-money", {
-      state: {
-        recipientName: `${user.firstName} ${user.lastName}`,
-        recipientInitial: user.firstName[0],
-      },
+      state: navigationState,
     });
   };
 
@@ -154,7 +176,7 @@ export const Users = () => {
         <div className="space-y-4">
           {filteredUsers.map((user, index) => (
             <div
-              key={user._id}
+              key={user.id}
               className="transform transition-all duration-300 hover:scale-[1.02]"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
