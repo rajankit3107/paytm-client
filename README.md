@@ -1,4 +1,4 @@
-# PayTM Client Application
+# next-pay Client Application
 
 A modern, elegant money transfer application built with React, TypeScript, and Tailwind CSS. This application provides a seamless user experience for managing accounts, viewing balances, and transferring money between users.
 
